@@ -1,0 +1,7 @@
+// server.js
+const app = require('./app'); // Import the app from app.js
+const port = 3000;
+
+app.listen(port, () => {
+  console.log(`Example app listening at http://localhost:${port}`);
+});
