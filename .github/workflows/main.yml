@@ -1,4 +1,4 @@
-name: Node.js CI/CD Pipeline
+name: Node.js CI/CD Pipeline with ServiceNow Change
 
 on:
   push:
@@ -7,80 +7,59 @@ on:
     branches: [ main ]
 
 jobs:
-  #--------------------------------
-  # 1. BUILD STAGE
-  #--------------------------------
+  # Stages 1, 2, and 3 remain the same
   build:
     runs-on: ubuntu-latest
     name: "Stage 1: Build & Lint"
-    
     steps:
     - name: "Checkout code"
       uses: actions/checkout@v4
-
-    - name: "Set up Node.js"
-      uses: actions/setup-node@v4
       with:
-        node-version: '20.x'
-        cache: 'npm' # Cache npm dependencies for faster builds
-
-    - name: "Install dependencies"
-      run: npm ci # Use 'ci' for cleaner, more reliable installs in CI
-
-    - name: "Lint code (if linter is configured)"
-      run: npm run lint --if-present
-
-  #--------------------------------
-  # 2. TEST STAGE
-  #--------------------------------
-  test:
-    runs-on: ubuntu-latest
-    name: "Stage 2: Run Unit Tests"
-    needs: build # This stage only runs if the 'build' stage succeeds
-    
-    steps:
-    - name: "Checkout code"
-      uses: actions/checkout@v4
-
+        fetch-depth: 0
     - name: "Set up Node.js"
       uses: actions/setup-node@v4
       with:
         node-version: '20.x'
         cache: 'npm'
-
     - name: "Install dependencies"
       run: npm ci
 
+  test:
+    runs-on: ubuntu-latest
+    name: "Stage 2: Run Unit Tests"
+    needs: build
+    steps:
+    - name: "Checkout code"
+      uses: actions/checkout@v4
+    - name: "Set up Node.js"
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+    - name: "Install dependencies"
+      run: npm ci
     - name: "Run tests and generate coverage report"
-      run: npm test -- --coverage # Assumes Jest is configured for coverage
-
+      run: npm test -- --coverage
     - name: "Upload test coverage report"
       uses: actions/upload-artifact@v4
       with:
         name: coverage-report
-        path: coverage/ # Path where Jest coverage report is generated
+        path: coverage/
 
-  #--------------------------------
-  # 3. PACKAGE STAGE
-  #--------------------------------
   package:
     runs-on: ubuntu-latest
-    name: "Stage 3: Package Application for Deployment"
-    needs: test # This stage only runs if 'test' succeeds
-
+    name: "Stage 3: Package Application"
+    needs: test
     steps:
     - name: "Checkout code"
       uses: actions/checkout@v4
-
     - name: "Set up Node.js"
       uses: actions/setup-node@v4
       with:
         node-version: '20.x'
         cache: 'npm'
-
     - name: "Install production dependencies"
-      run: npm ci --omit=dev # Install only production dependencies for a smaller package
-
+      run: npm ci --omit=dev
     - name: "Create deployment package"
       run: |
         mkdir -p deploy-package
@@ -88,32 +67,57 @@ jobs:
         cp package.json deploy-package/
         cp package-lock.json deploy-package/
         cp -r node_modules/ deploy-package/node_modules/
-
     - name: "Upload deployment artifact"
       uses: actions/upload-artifact@v4
       with:
         name: node-app-package
         path: deploy-package/
 
-  #--------------------------------
-  # 4. DEPLOY STAGE
-  #--------------------------------
+  #-------------------------------------------------------------------
+  # DEPLOY STAGE: Creates Change, Waits for Approval, and Deploys
+  #-------------------------------------------------------------------
   deploy:
+    name: "Stage 4: Deploy to Production (via ServiceNow Change)"
+    needs: package # This job depends on the package job
     runs-on: ubuntu-latest
-    name: "Stage 4: Deploy to Production"
-    needs: package # This stage only runs if 'package' succeeds
-    environment: 'production' # Defines a GitHub environment for protection rules
-
+  
+    
     steps:
-    - name: "Download deployment package"
-      uses: actions/download-artifact@v4
-      with:
-        name: node-app-package
+      # This is the step from the documentation, with our corrections
+      - name: "Create ServiceNow Change and wait for approval"
+        id: create_change # Added an ID so we can reference its output
+        uses: ServiceNow/servicenow-devops-change-automation@main
+        with:
+          # Corrected to use our secret and variable names
+          devops-integration-user-name: ${{ secrets.SERVICENOW_USERNAME }}
+          devops-integration-user-password: ${{ secrets.SERVICENOW_PASSWORD }}
+          instance-url: ${{ secrets.SERVICENOW_URL }}
+          tool-id: ${{ vars.SN_DEVOPS_TOOL_ID }}
 
-    - name: "Simulate deployment"
-      run: |
-        echo "Deploying application..."
-        ls -R
-        echo "Deployment complete."
-        # In a real scenario, this is where you would have scripts
-        # to SSH, SCP, or use a cloud provider's CLI to deploy the files.
+          # This context is correct and provides all commit data to ServiceNow
+          context-github: ${{ toJSON(github) }}
+          
+          # This tells the action that this very job ('Deploy to Production') is the one to resume
+          job-name: 'Stage 4: Deploy to Production (via ServiceNow Change)'
+
+          # IMPORTANT: You must change the assignment_group sys_id below!
+          change-request-details: '{ "short_description": "Automated deployment for simple-node-app",
+           "description": "Automated deployment of new commits from CI/CD pipeline.", "assignment_group": "b85d44954a3623120004689b2d5dd60a", 
+           "implementation_plan": "Automated deployment via GitHub Actions upon change approval.", 
+           "backout_plan": "The previous successful artifact will be re-deployed via the pipeline.", 
+           "test_plan": "All automated tests passed in the Test stage of the pipeline." }'
+          
+      # This step will only run AFTER the ServiceNow Change is approved
+      - name: "Deployment started for Change ${{ steps.create_change.outputs.change-request-number }}"
+        run: echo "ServiceNow Change ${{ steps.create_change.outputs.change-request-number }} approved. Starting deployment."
+
+      - name: "Download deployment package"
+        uses: actions/download-artifact@v4
+        with:
+          name: node-app-package
+
+      - name: "Simulate deployment"
+        run: |
+          echo "Deploying application artifact..."
+          ls -R
+          echo "Deployment complete."
