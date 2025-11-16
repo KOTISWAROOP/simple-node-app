@@ -86,7 +86,7 @@ jobs:
       # This is the step from the documentation, with our corrections
       - name: "Create ServiceNow Change and wait for approval"
         id: create_change # Added an ID so we can reference its output
-        uses: ServiceNow/servicenow-devops-change-automation@main
+        uses: ServiceNow/servicenow-devops-change@v6.1.0
         with:
           # Corrected to use our secret and variable names
           devops-integration-user-name: ${{ secrets.SERVICENOW_USERNAME }}
@@ -101,7 +101,7 @@ jobs:
           job-name: 'Stage 4: Deploy to Production (via ServiceNow Change)'
 
           # IMPORTANT: You must change the assignment_group sys_id below!
-          change-request-details: '{ "short_description": "Automated deployment for simple-node-app",
+          change-request: '{ "short_description": "Automated deployment for simple-node-app",
            "description": "Automated deployment of new commits from CI/CD pipeline.", "assignment_group": "b85d44954a3623120004689b2d5dd60a", 
            "implementation_plan": "Automated deployment via GitHub Actions upon change approval.", 
            "backout_plan": "The previous successful artifact will be re-deployed via the pipeline.", 
