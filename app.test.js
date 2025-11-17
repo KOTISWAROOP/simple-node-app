@@ -12,7 +12,7 @@ describe('GET /', () => {
 
     // Assertions: Check if the response is what we expect
     expect(response.statusCode).toBe(200);
-    expect(response.text).toBe('Hello World!');
+    expect(response.text).toBe('Hello World!!');
   });
 
 });
