@@ -6,7 +6,7 @@ const app = require('./app'); // Import your app logic
 describe('GET /', () => {
 
   // Define a specific test case
-  it('should respond with a 200 status code and "Hello World!"', async () => {
+  it('should respond with a 200 status code and "Hello World!!"', async () => {
     // 'request(app)' uses supertest to make a request to our app object
     const response = await request(app).get('/');
 
