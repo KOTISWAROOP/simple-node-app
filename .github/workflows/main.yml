@@ -76,7 +76,7 @@ jobs:
   changeApproval:
     name: ServiceNow Change Approval
     needs: package
-    runs-on: ubutun-latest
+    runs-on: ubuntun-latest
 
     steps:     
       - name: ServiceNow Change Approval
