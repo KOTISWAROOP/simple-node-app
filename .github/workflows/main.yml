@@ -83,11 +83,11 @@ jobs:
         name: node-app-package
         path: deploy-package/
 
-  changeApproval:
-    name: ServiceNow Change Approval
+  sendArtifactAndTestResultsToServiceNow:
+    name: "Send Artifact and Test Results to ServiceNow"
     needs: package
-    runs-on: ubuntu-latest
-
+    runs-on: ubuntu-latest 
+    
     steps:
       - name: "Download test reports artifact"
         uses: actions/download-artifact@v4
@@ -122,6 +122,12 @@ jobs:
           job-name: "Stage 3: Package Application"
           artifacts: '[{"name": "com:customactiondemo","version": "1.${{ github.run_number }}","semanticVersion": "1.${{ github.run_number }}.0","repositoryName": "${{ github.repository }}"}]'
 
+  changeApproval:
+    name: ServiceNow Change Approval
+    needs: package
+    runs-on: ubuntu-latest
+
+    steps:
       - name: ServiceNow Change
         uses: ServiceNow/servicenow-devops-change@v6.1.0
         id: create
