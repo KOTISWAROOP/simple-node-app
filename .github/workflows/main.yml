@@ -44,7 +44,7 @@ jobs:
       # We explicitly tell Jest to use the JUnit reporter.
       run: npm test -- --coverage --reporters=default --reporters=jest-junit
 
-    # ADD THIS NEW DEBUGGING STEP
+    # ADD THIS NEW DEBUGGING STEP.
     - name: "List all files in the workspace"
       run: ls -R
 
