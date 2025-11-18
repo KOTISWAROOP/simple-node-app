@@ -41,7 +41,7 @@ jobs:
 
     # MODIFIED THIS STEP
     - name: "Run tests and generate reports"
-      # We explicitly tell Jest to use the JUnit reporter.
+      # We explicitly tell Jest to use the JUnit reporter
       run: npm test -- --coverage --reporters=default --reporters=jest-junit
 
     # ADD THIS NEW DEBUGGING STEP.
