@@ -155,7 +155,7 @@ jobs:
       - name: Output of Change Creation
         run: echo "change-request-number = ${{ steps.create.outputs.change-request-number }} and change-request-sys-id = ${{ steps.create.outputs.change-request-sys-id }} " >> $GITHUB_OUTPUT 
   #-------------------------------------------------------------------
-  # DEPLOY STAGE: Creates Change, Waits for Approval, and Deploys
+  # DEPLOY STAGE: Creates Change, Waits for Approval, and Deploys.
   #-------------------------------------------------------------------
   deploy:
     name: "Deploy"
