@@ -78,7 +78,30 @@ jobs:
     needs: package
     runs-on: ubuntu-latest
 
-    steps:     
+    steps:
+      - name: ServiceNow DevOps Unit Test Results
+        uses: ServiceNow/servicenow-devops-test-report@v6.0.0
+        with:
+          devops-integration-user-name: ${{ secrets.SERVICENOW_USERNAME }}
+          devops-integration-user-password: ${{ secrets.SERVICENOW_PASSWORD }}
+          instance-url: ${{ secrets.SERVICENOW_URL }}
+          tool-id: ${{ secrets.SN_DEVOPS_TOOL_ID }}
+          context-github: ${{ toJSON(github) }}
+          job-name: 'Build'
+          xml-report-filename: target/surefire-reports/testng-results.xml
+          test-summary-name: 'TestSummary'
+
+      - name: ServiceNow Register Artifact
+        uses: ServiceNow/servicenow-devops-register-artifact@v3.1.0
+        with:
+          devops-integration-user-name: ${{ secrets.SERVICENOW_USERNAME }}
+          devops-integration-user-password: ${{ secrets.SERVICENOW_PASSWORD }}
+          instance-url: ${{ secrets.SERVICENOW_URL }}
+          tool-id: ${{ secrets.SN_DEVOPS_TOOL_ID }}
+          context-github: ${{ toJSON(github) }}
+          job-name: 'Register Artifact'
+          artifacts: '[{"name": "com:customactiondemo","version": "1.${{ github.run_number }}","semanticVersion": "1.${{ github.run_number }}.0","repositoryName": "${{ github.repository }}"}]'
+
       - name: ServiceNow Change Approval
         uses: ServiceNow/servicenow-devops-change@v6.1.0
         id: create
@@ -97,6 +120,7 @@ jobs:
              automated by the CICD pipeline within the change planned start and end time window.",
              "backout_plan":"When software fails in production, the previous software release will be re-deployed.",
              "test_plan":"Testing if the software was successfully deployed. Testing went well in lower environments.",
+             "business_service":"ffa678bddb48dc10e1d83967f496196a",
              "chg_model": "adffaa9e4370211072b7f6be5bb8f2ed"}
              }'
           interval: '100'
