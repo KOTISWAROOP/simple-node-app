@@ -129,6 +129,7 @@ jobs:
     steps:
       - name: ServiceNow Change
         uses: ServiceNow/servicenow-devops-change@v6.1.0
+        id: create
         with:
           devops-integration-user-name: ${{ secrets.SERVICENOW_USERNAME }}
           devops-integration-user-password: ${{ secrets.SERVICENOW_PASSWORD }}
