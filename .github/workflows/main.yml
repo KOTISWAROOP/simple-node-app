@@ -39,17 +39,19 @@ jobs:
     - name: "Install dependencies"
       run: npm ci
 
-    # This step generates BOTH the coverage/ directory and the reports/ directory
-    - name: "Run tests and generate coverage/junit reports"
-      run: npm test -- --coverage
+    # MODIFIED THIS STEP
+    - name: "Run tests and generate reports"
+      # We explicitly tell Jest to use the JUnit reporter
+      run: npm test -- --coverage --reporters=default --reporters=jest-junit
 
-    # This is the corrected upload step
+    # ADD THIS NEW DEBUGGING STEP
+    - name: "List all files in the workspace"
+      run: ls -R
+
     - name: "Upload test reports artifact"
       uses: actions/upload-artifact@v4
       with:
-        # 1. Use the name the next job is expecting
         name: test-reports
-        # 2. Include BOTH directories
         path: |
           coverage/
           reports/
