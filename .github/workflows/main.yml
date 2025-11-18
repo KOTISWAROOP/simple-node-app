@@ -124,7 +124,7 @@ jobs:
 
   changeApproval:
     name: ServiceNow Change Approval
-    needs: package
+    needs: sendArtifactAndTestResultsToServiceNow
     runs-on: ubuntu-latest
 
     steps:
