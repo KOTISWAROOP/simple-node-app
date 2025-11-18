@@ -123,21 +123,19 @@ jobs:
           artifacts: '[{"name": "com:customactiondemo","version": "1.${{ github.run_number }}","semanticVersion": "1.${{ github.run_number }}.0","repositoryName": "${{ github.repository }}"}]'
 
   changeApproval:
-    name: ServiceNow Change Approval
+    name: Change
     needs: sendArtifactAndTestResultsToServiceNow
     runs-on: ubuntu-latest
-
     steps:
       - name: ServiceNow Change
         uses: ServiceNow/servicenow-devops-change@v6.1.0
-        id: create
         with:
           devops-integration-user-name: ${{ secrets.SERVICENOW_USERNAME }}
           devops-integration-user-password: ${{ secrets.SERVICENOW_PASSWORD }}
           instance-url: ${{ secrets.SERVICENOW_URL }}
           tool-id: ${{ secrets.SN_DEVOPS_TOOL_ID }}
           context-github: ${{ toJSON(github) }}
-          job-name: 'ServiceNow Change Approval'
+          job-name: 'Change'
           change-request: '{"setCloseCode":"true", "attributes":{
             "short_description":"Automated Software Deployment",
             "description":"Automated Software Deployment.",
