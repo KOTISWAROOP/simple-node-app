@@ -122,7 +122,7 @@ jobs:
           job-name: "Stage 3: Package Application"
           artifacts: '[{"name": "com:customactiondemo","version": "1.${{ github.run_number }}","semanticVersion": "1.${{ github.run_number }}.0","repositoryName": "${{ github.repository }}"}]'
 
-      - name: ServiceNow Change Approval
+      - name: ServiceNow Change
         uses: ServiceNow/servicenow-devops-change@v6.1.0
         id: create
         with:
@@ -131,7 +131,7 @@ jobs:
           instance-url: ${{ secrets.SERVICENOW_URL }}
           tool-id: ${{ secrets.SN_DEVOPS_TOOL_ID }}
           context-github: ${{ toJSON(github) }}
-          job-name: 'Stage 4: Deploy to Production (via ServiceNow Change)'
+          job-name: 'ServiceNow Change Approval'
           change-request: '{"setCloseCode":"true", "attributes":{
             "short_description":"Automated Software Deployment",
             "description":"Automated Software Deployment.",
@@ -154,7 +154,7 @@ jobs:
   # DEPLOY STAGE: Creates Change, Waits for Approval, and Deploys
   #-------------------------------------------------------------------
   deploy:
-    name: "Stage 4: Deploy to Production (via ServiceNow Change)"
+    name: "Deploy"
     needs: changeApproval # This job depends on the package job.
     runs-on: ubuntu-latest
   
