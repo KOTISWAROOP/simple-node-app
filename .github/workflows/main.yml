@@ -155,7 +155,7 @@ jobs:
   #-------------------------------------------------------------------
   deploy:
     name: "Stage 4: Deploy to Production (via ServiceNow Change)"
-    needs: changeApproval # This job depends on the package job
+    needs: changeApproval # This job depends on the package job.
     runs-on: ubuntu-latest
   
     steps:
