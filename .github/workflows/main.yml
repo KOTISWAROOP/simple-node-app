@@ -83,48 +83,11 @@ jobs:
         name: node-app-package
         path: deploy-package/
 
-  sendArtifactAndTestResultsToServiceNow:
-    name: "Send Artifact and Test Results to ServiceNow"
-    needs: package
-    runs-on: ubuntu-latest 
-    
-    steps:
-      - name: "Download test reports artifact"
-        uses: actions/download-artifact@v4
-        with:
-          name: test-reports
-      
-      - name: "Download application package artifact"
-        uses: actions/download-artifact@v4
-        with:
-          name: node-app-package
-
-      - name: ServiceNow DevOps Unit Test Results
-        uses: ServiceNow/servicenow-devops-test-report@v6.0.0
-        with:
-          devops-integration-user-name: ${{ secrets.SERVICENOW_USERNAME }}
-          devops-integration-user-password: ${{ secrets.SERVICENOW_PASSWORD }}
-          instance-url: ${{ secrets.SERVICENOW_URL }}
-          tool-id: ${{ secrets.SN_DEVOPS_TOOL_ID }}
-          context-github: ${{ toJSON(github) }}
-          job-name: "Stage 2: Run Unit Tests"
-          xml-report-filename: reports/junit.xml
-          test-summary-name: 'TestSummary'
-
-      - name: ServiceNow Register Artifact
-        uses: ServiceNow/servicenow-devops-register-artifact@v3.1.0
-        with:
-          devops-integration-user-name: ${{ secrets.SERVICENOW_USERNAME }}
-          devops-integration-user-password: ${{ secrets.SERVICENOW_PASSWORD }}
-          instance-url: ${{ secrets.SERVICENOW_URL }}
-          tool-id: ${{ secrets.SN_DEVOPS_TOOL_ID }}
-          context-github: ${{ toJSON(github) }}
-          job-name: "Stage 3: Package Application"
-          artifacts: '[{"name": "com:customactiondemo","version": "1.${{ github.run_number }}","semanticVersion": "1.${{ github.run_number }}.0","repositoryName": "${{ github.repository }}"}]'
+  
 
   changeApproval:
     name: Change
-    needs: sendArtifactAndTestResultsToServiceNow
+    needs: package
     runs-on: ubuntu-latest
     steps:
       - name: ServiceNow Change
