@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  # Stages 1, 2, and 3 remain the same for build, test, and package.
+  # Stages 1, 2, and 3 remain the same for build, test, and packaging.
   build:
     runs-on: ubuntu-latest
     name: "Stage 1: Build & Lint"
