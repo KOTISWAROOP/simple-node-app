@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  # Stages 1, 2, and 3 remain the same
+  # Stages 1, 2, and 3 remain the same.
   build:
     runs-on: ubuntu-latest
     name: "Stage 1: Build & Lint"
